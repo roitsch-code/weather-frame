@@ -18,10 +18,8 @@
     <!-- Dawn / dusk warm tint overlay — transparent by default, coloured by JS time-of-day class -->
     <div class="sky-tint"></div>
 
-    <!-- Sleepy night: moon + JS-spawned stars & fireflies -->
-    <div class="night-wrap">
-      <div class="moon"></div>
-    </div>
+    <!-- Sleepy night: JS-spawned stars & fireflies; Moon.png shown as weather emoji -->
+    <div class="night-wrap"></div>
 
     <!-- Sunny: sun -->
     <div class="sun-wrap">
@@ -111,9 +109,9 @@
   <!-- ── Characters ────────────────────────────────── -->
   <!-- Lio LEFT (faces right naturally), Mika RIGHT (faces left naturally) -->
   <div id="characters">
-    <img id="lio"  src="images/Lio_Summer_Warm.png"  alt="Lio"
+    <img id="lio"  src="" alt="Lio"  style="visibility:hidden"
          onerror="this.style.visibility='hidden'">
-    <img id="mika" src="images/Mika_Summer_Warm.png" alt="Mika"
+    <img id="mika" src="" alt="Mika" style="visibility:hidden"
          onerror="this.style.visibility='hidden'">
   </div>
 

@@ -645,32 +645,7 @@ body.time-dusk:not(.scene-sleepy):not(.scene-thunderstorm) .sky-tint {
   z-index: 2;
 }
 
-.moon {
-  position: absolute;
-  top: 7%;
-  right: 11%;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: #fffce8;
-  box-shadow:
-    0 0 14px rgba(255, 250, 200, 0.85),
-    0 0 38px rgba(255, 240, 150, 0.45),
-    0 0 70px rgba(255, 220, 100, 0.18);
-  animation: moon-glow 5s ease-in-out infinite;
-}
-
-/* Crescent shadow (dark bite from one side) */
-.moon::before {
-  content: '';
-  position: absolute;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: #06091e; /* matches night sky */
-  top: -4px;
-  left: 12px;
-}
+/* Moon is now the Pixar Moon.png shown as the weather emoji — no CSS moon needed */
 
 /* JS-spawned night stars (go into snow-wrap, reuse sparkle anim) */
 .night-star {
