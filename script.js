@@ -296,7 +296,7 @@ function updateUI(tempRaw, apparentRaw, weatherCode, windSpeed, cloudCover) {
   _lastTemp = tempRaw; _lastApparent = apparentRaw;
   _lastCode = weatherCode; _lastWind = windSpeed; _lastCloud = cloudCover;
 
-  const outfit    = determineOutfit(tempRaw, weatherCode, now);
+  const outfit    = determineOutfit(apparentRaw ?? tempRaw, weatherCode, now);
   const outfitSrc = resolveOutfitSrc(outfit);
 
   // Update temperatures
