@@ -1,0 +1,936 @@
+/* ═══════════════════════════════════════════════════
+   Lio & Mika's Weather — style.css
+   ═══════════════════════════════════════════════════ */
+
+/* ─── 1. Reset & Base ──────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Nunito', sans-serif;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* ─── 2. Scene Container ───────────────────────────── */
+#scene-container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.sky-layer {
+  position: absolute;
+  inset: 0;
+  transition: background 1.8s ease;
+}
+
+.ground-layer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 12vh;
+  transition: background 1.8s ease, height 1.8s ease, border-radius 1.8s ease;
+}
+
+/* ─── 3. Scene Visibility ──────────────────────────── */
+/* Hide everything by default */
+.sun-wrap, .cloud-wrap, .butterfly-wrap,
+.tree-wrap, .leaf-wrap, .petal-wrap,
+.rain-wrap, .snow-wrap, .confetti-wrap,
+.fog-wrap, .lightning-wrap, .puddles {
+  display: none;
+}
+
+/* Sunny: sun, clouds, butterfly */
+body.scene-sunny .sun-wrap,
+body.scene-sunny .cloud-wrap,
+body.scene-sunny .butterfly-wrap { display: block; }
+
+/* Spring: clouds, blooming tree, drifting petals, butterfly */
+body.scene-spring .cloud-wrap,
+body.scene-spring .tree-wrap,
+body.scene-spring .petal-wrap,
+body.scene-spring .butterfly-wrap { display: block; }
+
+/* Fall: clouds, bare tree, falling leaves */
+body.scene-fall .cloud-wrap,
+body.scene-fall .tree-wrap,
+body.scene-fall .leaf-wrap { display: block; }
+
+/* Rainy: dark clouds, rain, puddles */
+body.scene-rainy .cloud-wrap,
+body.scene-rainy .rain-wrap,
+body.scene-rainy .puddles { display: block; }
+
+/* Thunderstorm: very dark clouds, heavy rain, lightning flash, puddles */
+body.scene-thunderstorm .cloud-wrap,
+body.scene-thunderstorm .rain-wrap,
+body.scene-thunderstorm .lightning-wrap,
+body.scene-thunderstorm .puddles { display: block; }
+
+/* Foggy: mist bands */
+body.scene-foggy .fog-wrap { display: block; }
+
+/* Cloudy: just clouds */
+body.scene-cloudy .cloud-wrap { display: block; }
+
+/* Windy: fast clouds, blowing leaves */
+body.scene-windy .cloud-wrap,
+body.scene-windy .leaf-wrap { display: block; }
+
+/* Winter: snowflakes + sparkles */
+body.scene-winter .snow-wrap { display: block; }
+
+/* Weekend: confetti + stars */
+body.scene-weekend .confetti-wrap { display: block; }
+
+/* ─── 4. Sky Gradients ─────────────────────────────── */
+body.scene-sunny        .sky-layer { background: linear-gradient(to bottom, #5BA4D4 0%, #87CEEB 45%, #C8EBF5 100%); }
+body.scene-spring       .sky-layer { background: linear-gradient(to bottom, #74b9e8 0%, #a8d8f0 40%, #c8f0d8 100%); }
+body.scene-fall         .sky-layer { background: linear-gradient(to bottom, #B85C20 0%, #D4722A 35%, #E8963C 65%, #F5C27A 100%); }
+body.scene-rainy        .sky-layer { background: linear-gradient(to bottom, #2d3748 0%, #4a5568 40%, #5a6a7a 100%); }
+body.scene-thunderstorm .sky-layer { background: linear-gradient(to bottom, #0d0d1a 0%, #1a1a30 40%, #252540 100%); }
+body.scene-foggy        .sky-layer { background: linear-gradient(to bottom, #7a8a95 0%, #9aacb8 40%, #b8c8d0 100%); }
+body.scene-cloudy       .sky-layer { background: linear-gradient(to bottom, #5a6878 0%, #7a8898 40%, #9aaab8 100%); }
+body.scene-windy        .sky-layer { background: linear-gradient(to bottom, #4a9ac8 0%, #70bae0 40%, #a0d4f0 100%); }
+body.scene-winter       .sky-layer { background: linear-gradient(to bottom, #7fb3d3 0%, #aed6f1 40%, #d6eaf8 75%, #eaf4fc 100%); }
+body.scene-weekend      .sky-layer { background: linear-gradient(to bottom, #3b2fa0 0%, #5e3aad 35%, #9b5fc0 70%, #c77ddb 100%); }
+
+/* ─── 5. Ground Layer ──────────────────────────────── */
+body.scene-sunny   .ground-layer {
+  background: linear-gradient(to top, #2d6a1a 0%, #4a8a2c 60%, #5fa832 100%);
+}
+body.scene-spring  .ground-layer {
+  background: linear-gradient(to top, #1e6e14 0%, #3aaa28 60%, #55d040 100%);
+}
+body.scene-fall    .ground-layer {
+  background: linear-gradient(to top, #4a3008 0%, #7a5210 60%, #9b6a14 100%);
+}
+body.scene-rainy   .ground-layer {
+  background: linear-gradient(to top, #1c2e14 0%, #2e4420 60%, #3a5028 100%);
+}
+body.scene-thunderstorm .ground-layer {
+  background: linear-gradient(to top, #0e1a0a 0%, #182210 60%, #202e16 100%);
+}
+body.scene-foggy   .ground-layer {
+  background: linear-gradient(to top, #3a4640 0%, #4e5e56 60%, #606e66 100%);
+}
+body.scene-cloudy  .ground-layer {
+  background: linear-gradient(to top, #2a5a1a 0%, #3a7022 60%, #4a8530 100%);
+}
+body.scene-windy   .ground-layer {
+  background: linear-gradient(to top, #2a5a18 0%, #3c7020 60%, #4e8830 100%);
+}
+body.scene-winter  .ground-layer {
+  background: linear-gradient(to top, #b8d8ef 0%, #d6eaf8 60%, #edf7ff 100%);
+  height: 16vh;
+  border-radius: 55% 45% 0 0 / 30px 25px 0 0;
+}
+body.scene-weekend .ground-layer {
+  background: linear-gradient(to top, #2a1a7a 0%, #4f3aad 60%, #6d28d9 100%);
+}
+
+/* ─── 5b. Spring Tree — cherry blossom override ────── */
+body.scene-spring .tree-top {
+  background: radial-gradient(ellipse at 45% 40%, #ffcce0 30%, #ff91b8 80%, #e8749a 100%);
+  box-shadow:
+    -18px 14px 0 rgba(255, 160, 190, 0.65),
+    18px 10px 0 rgba(230, 100, 150, 0.55),
+    0 20px 0 rgba(220, 90, 140, 0.35);
+}
+body.scene-spring .tree-trunk {
+  background: linear-gradient(to right, #8d6e63, #6d4c41);
+}
+
+/* ─── 6. Sun ────────────────────────────────────────── */
+.sun-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sun {
+  position: absolute;
+  top: 5%;
+  right: 9%;
+  width: 150px;
+  height: 150px;
+  animation: spin 24s linear infinite;
+}
+
+.sun .core {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 40% 40%, #fffde7 0%, #ffe57f 40%, #ffd700 100%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 18px #ffd700,
+    0 0 38px rgba(255, 210, 0, 0.65),
+    0 0 65px rgba(255, 165, 0, 0.35);
+  z-index: 1;
+  animation: ray-pulse 3.5s ease-in-out infinite;
+}
+
+.sun .ray {
+  position: absolute;
+  width: 6px;
+  height: 46%;
+  background: linear-gradient(to top, rgba(255, 215, 0, 0.85), rgba(255, 230, 100, 0.15));
+  border-radius: 3px 3px 0 0;
+  bottom: 50%;
+  left: 50%;
+  margin-left: -3px;
+  transform-origin: bottom center;
+}
+
+/* ─── 7. Clouds ─────────────────────────────────────── */
+.cloud-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cloud {
+  position: absolute;
+  border-radius: 50px;
+}
+
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  background: inherit;
+  border-radius: 50%;
+}
+
+/* Sunny: white fluffy */
+body.scene-sunny .cloud { background: rgba(255, 255, 255, 0.95); }
+
+/* Spring: soft white */
+body.scene-spring .cloud { background: rgba(255, 255, 255, 0.88); }
+
+/* Fall: warm amber tinted */
+body.scene-fall .cloud { background: rgba(220, 175, 110, 0.80); }
+
+/* Rainy: heavy dark grey */
+body.scene-rainy .cloud { background: rgba(55, 65, 81, 0.95); }
+
+/* Thunderstorm: near-black */
+body.scene-thunderstorm .cloud { background: rgba(20, 22, 35, 0.98); }
+
+/* Foggy: pale ghostly */
+body.scene-foggy .cloud { background: rgba(175, 190, 200, 0.55); }
+
+/* Cloudy: medium grey */
+body.scene-cloudy .cloud { background: rgba(120, 138, 155, 0.92); }
+
+/* Windy: bright white, faster */
+body.scene-windy .cloud { background: rgba(245, 250, 255, 0.95); }
+
+.cloud-1 {
+  width: 145px; height: 46px;
+  top: 9%; left: -170px;
+  animation: drift-cloud 42s linear infinite;
+}
+.cloud-1::before { width: 72px; height: 72px; top: -36px; left: 18px; }
+.cloud-1::after  { width: 52px; height: 52px; top: -24px; left: 62px; }
+
+.cloud-2 {
+  width: 115px; height: 36px;
+  top: 19%; left: -135px;
+  animation: drift-cloud 58s linear infinite;
+  animation-delay: -22s;
+}
+.cloud-2::before { width: 58px; height: 58px; top: -29px; left: 14px; }
+.cloud-2::after  { width: 42px; height: 42px; top: -18px; left: 52px; }
+
+.cloud-3 {
+  width: 170px; height: 52px;
+  top: 6%; left: -200px;
+  animation: drift-cloud 70s linear infinite;
+  animation-delay: -38s;
+}
+.cloud-3::before { width: 85px; height: 85px; top: -42px; left: 24px; }
+.cloud-3::after  { width: 62px; height: 62px; top: -30px; left: 78px; }
+
+.cloud-4 {
+  width: 130px; height: 42px;
+  top: 26%; left: -155px;
+  animation: drift-cloud 52s linear infinite;
+  animation-delay: -30s;
+}
+.cloud-4::before { width: 65px; height: 65px; top: -32px; left: 16px; }
+.cloud-4::after  { width: 48px; height: 48px; top: -22px; left: 58px; }
+
+/* Rainy clouds: thicker + lower */
+body.scene-rainy .cloud-1 { top: 5%;  width: 200px; height: 60px; }
+body.scene-rainy .cloud-2 { top: 13%; width: 180px; height: 55px; }
+body.scene-rainy .cloud-3 { top: 2%;  width: 230px; height: 70px; }
+body.scene-rainy .cloud-4 { top: 20%; width: 160px; height: 50px; }
+
+/* Thunderstorm clouds: huge, menacing */
+body.scene-thunderstorm .cloud-1 { top: 2%;  width: 240px; height: 75px; }
+body.scene-thunderstorm .cloud-2 { top: 10%; width: 210px; height: 68px; }
+body.scene-thunderstorm .cloud-3 { top: 0%;  width: 280px; height: 90px; }
+body.scene-thunderstorm .cloud-4 { top: 15%; width: 200px; height: 65px; }
+
+/* Cloudy: full coverage, varied heights */
+body.scene-cloudy .cloud-1 { top: 5%;  width: 175px; height: 54px; }
+body.scene-cloudy .cloud-2 { top: 16%; width: 140px; height: 45px; }
+body.scene-cloudy .cloud-3 { top: 9%;  width: 200px; height: 62px; }
+body.scene-cloudy .cloud-4 { top: 23%; width: 150px; height: 48px; }
+
+/* Windy: fast animation */
+body.scene-windy .cloud-1 { animation-duration: 11s; }
+body.scene-windy .cloud-2 { animation-duration: 15s; }
+body.scene-windy .cloud-3 { animation-duration: 9s;  }
+body.scene-windy .cloud-4 { animation-duration: 13s; }
+
+/* ─── 8. Butterfly ─────────────────────────────────── */
+.butterfly-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.butterfly {
+  position: absolute;
+  bottom: 30%;
+  left: 24%;
+  width: 40px;
+  height: 30px;
+  animation: butterfly-wander 14s ease-in-out infinite;
+}
+
+.wing {
+  position: absolute;
+  width: 20px;
+  height: 26px;
+  top: 0;
+}
+
+.wing-left {
+  left: 0;
+  background: linear-gradient(145deg, #ff9ff3 30%, #f368e0 80%);
+  border-radius: 50% 10% 50% 50%;
+  transform-origin: right 65%;
+  animation: wing-flap 0.38s ease-in-out infinite alternate;
+}
+
+.wing-right {
+  right: 0;
+  background: linear-gradient(225deg, #ff9ff3 30%, #f368e0 80%);
+  border-radius: 10% 50% 50% 50%;
+  transform-origin: left 65%;
+  animation: wing-flap 0.38s ease-in-out infinite alternate-reverse;
+}
+
+/* ─── 9. Fall Tree ─────────────────────────────────── */
+.tree-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tree {
+  position: absolute;
+  bottom: 12vh;
+  right: 15%;
+}
+
+.tree-top {
+  width: 115px;
+  height: 95px;
+  background: radial-gradient(ellipse at 45% 40%, #8b4513 30%, #5c2e0a 100%);
+  border-radius: 50%;
+  margin: 0 auto;
+  box-shadow:
+    -18px 14px 0 rgba(90, 40, 6, 0.7),
+    18px 10px 0 rgba(70, 28, 5, 0.6),
+    0 20px 0 rgba(60, 22, 4, 0.4);
+}
+
+.tree-trunk {
+  width: 22px;
+  height: 58px;
+  background: linear-gradient(to right, #5d4037, #3e2723);
+  margin: 0 auto;
+  border-radius: 0 0 8px 8px;
+}
+
+/* ─── 10. Rain Particles ───────────────────────────── */
+.rain-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.raindrop {
+  position: absolute;
+  top: -25px;
+  width: 2px;
+  height: 18px;
+  background: linear-gradient(
+    to bottom,
+    rgba(174, 214, 241, 0.9),
+    rgba(126, 180, 234, 0.4)
+  );
+  border-radius: 1px;
+  animation: fall-rain linear infinite;
+}
+
+/* Thunderstorm: brighter, more intense raindrops */
+body.scene-thunderstorm .raindrop {
+  background: linear-gradient(
+    to bottom,
+    rgba(180, 220, 255, 0.95),
+    rgba(140, 190, 240, 0.5)
+  );
+  width: 2.5px;
+}
+
+.ripple {
+  position: absolute;
+  bottom: 13vh;
+  width: 32px;
+  height: 11px;
+  border: 2px solid rgba(174, 214, 241, 0.5);
+  border-radius: 50%;
+  animation: ripple ease-out infinite;
+}
+
+/* ─── 11. Leaf Particles ───────────────────────────── */
+.leaf-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.leaf {
+  position: absolute;
+  top: -65px;
+  border-radius: 50% 0 50% 0;
+  animation: fall-leaf ease-in-out infinite;
+}
+
+/* Wind-blown leaves use horizontal animation instead */
+.leaf.wind-leaf {
+  top: auto;
+  left: -80px;
+  animation-name: blow-wind;
+  animation-timing-function: linear;
+}
+
+/* ─── 11b. Spring Petals ───────────────────────────── */
+.petal-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.petal {
+  position: absolute;
+  top: -30px;
+  border-radius: 50% 0 50% 50%;
+  animation: fall-petal ease-in-out infinite;
+  opacity: 0.85;
+}
+
+/* ─── 12. Snow Particles ───────────────────────────── */
+.snow-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.snowflake {
+  position: absolute;
+  top: -30px;
+  color: rgba(210, 235, 255, 0.92);
+  animation: fall-snow linear infinite;
+  user-select: none;
+  line-height: 1;
+}
+
+.sparkle {
+  position: absolute;
+  color: white;
+  animation: sparkle ease-in-out infinite;
+  user-select: none;
+  line-height: 1;
+}
+
+/* ─── 13. Confetti + Stars ─────────────────────────── */
+.confetti-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  top: -22px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confetti-fall linear infinite;
+}
+
+.confetti.circle {
+  border-radius: 50%;
+  width: 9px;
+  height: 9px;
+}
+
+.confetti.ribbon {
+  width: 4px;
+  height: 15px;
+  border-radius: 2px;
+}
+
+.star {
+  position: absolute;
+  animation: sparkle ease-in-out infinite;
+  user-select: none;
+  line-height: 1;
+}
+
+/* ─── 14. Fog ──────────────────────────────────────── */
+.fog-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fog-band {
+  position: absolute;
+  width: 130%;
+  left: -15%;
+  border-radius: 50%;
+  background: rgba(215, 225, 235, 0.28);
+  filter: blur(22px);
+  animation: fog-drift ease-in-out infinite;
+}
+
+.fog-band-1 { height: 26vh; top: 18%;   animation-duration: 22s; animation-delay: 0s;   }
+.fog-band-2 { height: 20vh; top: 38%;   animation-duration: 28s; animation-delay: -9s;  opacity: 0.80; }
+.fog-band-3 { height: 24vh; top: 54%;   animation-duration: 19s; animation-delay: -15s; }
+.fog-band-4 { height: 30vh; top: 66%;   animation-duration: 32s; animation-delay: -6s;  opacity: 0.90; }
+
+/* ─── 15. Lightning ────────────────────────────────── */
+.lightning-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.lightning {
+  position: absolute;
+  inset: 0;
+  background: rgba(210, 220, 255, 0.75);
+  opacity: 0;
+  animation: lightning-flash 7s ease-in-out infinite;
+}
+
+/* ─── 16. Puddles ──────────────────────────────────── */
+.puddles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.puddle {
+  position: absolute;
+  bottom: 11vh;
+  width: 90px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 40% 38%,
+    rgba(174, 214, 241, 0.80) 0%,
+    rgba(110, 170, 225, 0.50) 50%,
+    transparent 100%
+  );
+  animation: puddle-shimmer ease-in-out infinite;
+  filter: blur(1px);
+}
+
+.puddle-lio  {
+  left: 36%;
+  transform: translateX(-50%);
+  animation-duration: 3.2s;
+  animation-delay: 0s;
+}
+.puddle-mika {
+  right: 36%;
+  transform: translateX(50%);
+  animation-duration: 2.8s;
+  animation-delay: -1.6s;
+}
+
+/* ─── 17. UI Overlay ───────────────────────────────── */
+#ui-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 2.8vh 3.5vw;
+}
+
+/* ── Clock block (top-left): day · time · temperature ── */
+#clock-block {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;   /* all children match the widest child */
+  gap: 0.05em;
+}
+
+#day-name {
+  font-size: clamp(0.65rem, 1.4vw, 1.05rem);
+  font-weight: 700;
+  color: white;
+  text-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.55),
+    0 1px 3px rgba(0, 0, 0, 0.35);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  /* Spread letters across the full clock width */
+  text-align: justify;
+  text-align-last: justify;
+}
+
+#clock {
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  font-weight: 900;
+  color: white;
+  text-shadow:
+    0 3px 14px rgba(0, 0, 0, 0.55),
+    0 1px 4px rgba(0, 0, 0, 0.40);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+#temperature {
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  font-weight: 900;
+  color: white;
+  text-shadow:
+    0 3px 14px rgba(0, 0, 0, 0.55),
+    0 1px 4px rgba(0, 0, 0, 0.40);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* ── Weather block (top-right): emoji only ── */
+#weather-block {
+  display: flex;
+  align-items: flex-start;
+}
+
+#weather-emoji {
+  font-size: clamp(5rem, 11vw, 9rem);
+  line-height: 1;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+}
+
+/* ─── 18. Characters ───────────────────────────────── */
+#characters {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+#lio {
+  position: absolute;
+  bottom: 0;
+  left: 23%;     /* LEFT side — PNG faces right naturally → looks inward ✓ */
+  height: 85vh;
+  width: auto;
+}
+
+#mika {
+  position: absolute;
+  bottom: 0;
+  right: 23%;    /* RIGHT side — PNG faces left naturally → looks inward ✓ */
+  height: 78vh;  /* ~92% of Lio — ~10 cm real-world height difference */
+  width: auto;
+  /* NO scaleX(-1) — Mika's PNG already faces the correct direction */
+}
+
+/* ─── 19. Portrait Hint ────────────────────────────── */
+#rotate-hint {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+@media (orientation: portrait) {
+  #rotate-hint { display: flex; }
+}
+
+/* ═══════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════════ */
+
+/* Sun rotation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Sun core glow pulse */
+@keyframes ray-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 18px #ffd700,
+      0 0 38px rgba(255, 210, 0, 0.65),
+      0 0 65px rgba(255, 165, 0, 0.30);
+  }
+  50% {
+    box-shadow:
+      0 0 26px #ffd700,
+      0 0 55px rgba(255, 210, 0, 0.85),
+      0 0 90px rgba(255, 140, 0, 0.45);
+  }
+}
+
+/* Cloud drift (left → right, loops seamlessly) */
+@keyframes drift-cloud {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(100vw + 300px)); }
+}
+
+/* Butterfly wing flap */
+@keyframes wing-flap {
+  0%   { transform: rotateY(0deg); }
+  100% { transform: rotateY(65deg) scaleY(0.85); }
+}
+
+/* Butterfly gentle wander */
+@keyframes butterfly-wander {
+  0%   { transform: translate(0,    0)    rotate(0deg);   }
+  15%  { transform: translate(55px, -45px) rotate(8deg);  }
+  30%  { transform: translate(25px, -85px) rotate(-4deg); }
+  50%  { transform: translate(80px, -55px) rotate(10deg); }
+  70%  { transform: translate(40px, -30px) rotate(-6deg); }
+  85%  { transform: translate(10px, -65px) rotate(5deg);  }
+  100% { transform: translate(0,    0)    rotate(0deg);   }
+}
+
+/* Falling rain */
+@keyframes fall-rain {
+  0%   { transform: translateY(0) rotate(18deg); opacity: 0; }
+  6%   { opacity: 0.75; }
+  93%  { opacity: 0.55; }
+  100% { transform: translateY(110vh) rotate(18deg); opacity: 0; }
+}
+
+/* Puddle ripple */
+@keyframes ripple {
+  0%   { transform: scale(0.25); opacity: 0.85; }
+  100% { transform: scale(2.8);  opacity: 0; }
+}
+
+/* Puddle shimmer / pulse */
+@keyframes puddle-shimmer {
+  0%, 100% { transform: translateX(0) scaleX(1);    opacity: 0.75; }
+  50%       { transform: translateX(0) scaleX(1.06); opacity: 0.95; }
+}
+.puddle-lio  { transform: translateX(-50%); }
+.puddle-lio:hover  { transform: translateX(-50%); }
+
+/* Falling autumn leaf */
+@keyframes fall-leaf {
+  0%   { transform: translateY(0)     translateX(0) rotate(0deg);   opacity: 1;   }
+  100% { transform: translateY(110vh) translateX(var(--drift-x, 90px)) rotate(720deg); opacity: 0.5; }
+}
+
+/* Horizontally blown leaf (windy scene) */
+@keyframes blow-wind {
+  0%   { transform: translateY(0)                translateX(0)     rotate(0deg);    opacity: 0;   }
+  8%   { opacity: 0.85; }
+  90%  { opacity: 0.70; }
+  100% { transform: translateY(var(--drift-y, 40px)) translateX(110vw) rotate(540deg); opacity: 0; }
+}
+
+/* Falling snowflake */
+@keyframes fall-snow {
+  0%   { transform: translateY(0)     translateX(0); opacity: 0; }
+  5%   { opacity: 0.85; }
+  50%  { transform: translateY(50vh)  translateX(var(--drift-x, 18px)); }
+  95%  { opacity: 0.7; }
+  100% { transform: translateY(112vh) translateX(0); opacity: 0; }
+}
+
+/* Falling confetti piece */
+@keyframes confetti-fall {
+  0%   { transform: translateY(0)     translateX(0) rotate(0deg);              opacity: 1;   }
+  85%  { opacity: 0.85; }
+  100% { transform: translateY(112vh) translateX(var(--drift-x, 50px)) rotate(var(--spin, 720deg)); opacity: 0; }
+}
+
+/* Falling cherry-blossom petal — gentle, slow, swaying */
+@keyframes fall-petal {
+  0%   { transform: translateY(0)     translateX(0)                  rotate(0deg);   opacity: 0;   }
+  5%   { opacity: 0.88; }
+  40%  { transform: translateY(38vh)  translateX(var(--drift-x, 30px)) rotate(160deg); }
+  75%  { transform: translateY(75vh)  translateX(calc(var(--drift-x, 30px) * -0.4)) rotate(300deg); }
+  95%  { opacity: 0.6; }
+  100% { transform: translateY(112vh) translateX(var(--drift-x, 30px)) rotate(450deg); opacity: 0; }
+}
+
+/* Sparkle / star twinkle */
+@keyframes sparkle {
+  0%, 100% { opacity: 0;   transform: scale(0.4) rotate(0deg);   }
+  50%       { opacity: 1;   transform: scale(1.2) rotate(180deg); }
+}
+
+/* ─── PIN Lock Overlay ─────────────────────────────── */
+#pin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(10, 14, 30, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#pin-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6rem;
+}
+
+#pin-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.04em;
+}
+
+#pin-dots {
+  display: flex;
+  gap: 1.1rem;
+}
+
+.dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.55);
+  background: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.dot.filled {
+  background: white;
+  border-color: white;
+}
+
+#pin-error {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ff6b6b;
+  min-height: 1.2em;
+  letter-spacing: 0.05em;
+}
+
+#pin-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.pin-btn {
+  width: clamp(60px, 8vw, 80px);
+  height: clamp(60px, 8vw, 80px);
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.08s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pin-btn:hover  { background: rgba(255, 255, 255, 0.22); }
+.pin-btn:active { background: rgba(255, 255, 255, 0.35); transform: scale(0.93); }
+
+.pin-btn.pin-empty {
+  background: transparent;
+  cursor: default;
+  pointer-events: none;
+}
+
+.pin-btn.pin-back {
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+}
+
+@keyframes pin-shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-10px); }
+  40%       { transform: translateX(10px); }
+  60%       { transform: translateX(-8px); }
+  80%       { transform: translateX(8px); }
+}
+
+#pin-box.shake { animation: pin-shake 0.45s ease; }
+
+/* ─── Fog band slow drift ── */
+/* Fog band slow drift */
+@keyframes fog-drift {
+  0%   { transform: translateX(0); }
+  50%  { transform: translateX(5%); }
+  100% { transform: translateX(0); }
+}
+
+/* Lightning screen flash */
+@keyframes lightning-flash {
+  0%,  4%, 7%, 100% { opacity: 0; }
+  2%                { opacity: 0.75; }
+  5%                { opacity: 0.35; }
+}

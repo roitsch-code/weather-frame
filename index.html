@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lio &amp; Mika's Weather</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="scene-sunny">
+
+  <!-- ── Background Scene ─────────────────────────── -->
+  <div id="scene-container">
+    <div class="sky-layer"></div>
+
+    <!-- Sunny: sun -->
+    <div class="sun-wrap">
+      <div class="sun">
+        <div class="core"></div>
+        <!-- rays injected by JS -->
+      </div>
+    </div>
+
+    <!-- Shared: drifting clouds (all non-winter scenes) -->
+    <div class="cloud-wrap">
+      <div class="cloud cloud-1"></div>
+      <div class="cloud cloud-2"></div>
+      <div class="cloud cloud-3"></div>
+      <div class="cloud cloud-4"></div>
+    </div>
+
+    <!-- Sunny: butterfly -->
+    <div class="butterfly-wrap">
+      <div class="butterfly">
+        <div class="wing wing-left"></div>
+        <div class="wing wing-right"></div>
+      </div>
+    </div>
+
+    <!-- Fall + Spring: tree silhouette -->
+    <div class="tree-wrap">
+      <div class="tree">
+        <div class="tree-top"></div>
+        <div class="tree-trunk"></div>
+      </div>
+    </div>
+    <div class="leaf-wrap"></div>
+
+    <!-- Spring: JS cherry-blossom petals -->
+    <div class="petal-wrap"></div>
+
+    <!-- Rainy + Thunderstorm: JS raindrops + ripples -->
+    <div class="rain-wrap"></div>
+
+    <!-- Foggy: layered mist bands -->
+    <div class="fog-wrap">
+      <div class="fog-band fog-band-1"></div>
+      <div class="fog-band fog-band-2"></div>
+      <div class="fog-band fog-band-3"></div>
+      <div class="fog-band fog-band-4"></div>
+    </div>
+
+    <!-- Thunderstorm: screen-wide lightning flash -->
+    <div class="lightning-wrap">
+      <div class="lightning"></div>
+    </div>
+
+    <!-- Winter: JS snowflakes + sparkles -->
+    <div class="snow-wrap"></div>
+
+    <!-- Weekend: JS confetti + stars -->
+    <div class="confetti-wrap"></div>
+
+    <div class="ground-layer"></div>
+
+    <!-- Puddles: shown when raining (inside scene so they sit on ground) -->
+    <div class="puddles">
+      <div class="puddle puddle-lio"></div>
+      <div class="puddle puddle-mika"></div>
+    </div>
+  </div>
+
+  <!-- ── UI Overlay ────────────────────────────────── -->
+  <div id="ui-overlay">
+
+    <!-- Top-left: day · clock · temperature stacked -->
+    <div id="clock-block">
+      <div id="day-name">Montag</div>
+      <div id="clock">00:00</div>
+      <div id="temperature">--°C</div>
+    </div>
+
+    <!-- Top-right: weather icon only (large) -->
+    <div id="weather-block">
+      <div id="weather-emoji">☀️</div>
+    </div>
+
+  </div>
+
+  <!-- ── Characters ────────────────────────────────── -->
+  <!-- Lio LEFT (faces right naturally), Mika RIGHT (faces left naturally) -->
+  <div id="characters">
+    <img id="lio"  src="images/Lio_Summer_Warm.png"  alt="Lio"
+         onerror="this.style.visibility='hidden'">
+    <img id="mika" src="images/Mika_Summer_Warm.png" alt="Mika"
+         onerror="this.style.visibility='hidden'">
+  </div>
+
+  <!-- Portrait rotate hint -->
+  <div id="rotate-hint">
+    <span>📱 Bitte Gerät drehen</span>
+  </div>
+
+  <!-- ── PIN Lock Overlay ─────────────────────────────── -->
+  <div id="pin-overlay">
+    <div id="pin-box">
+      <div id="pin-title">🌤️ Lio &amp; Mika</div>
+      <div id="pin-dots">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+      <div id="pin-error"></div>
+      <div id="pin-pad">
+        <button class="pin-btn" data-n="1">1</button>
+        <button class="pin-btn" data-n="2">2</button>
+        <button class="pin-btn" data-n="3">3</button>
+        <button class="pin-btn" data-n="4">4</button>
+        <button class="pin-btn" data-n="5">5</button>
+        <button class="pin-btn" data-n="6">6</button>
+        <button class="pin-btn" data-n="7">7</button>
+        <button class="pin-btn" data-n="8">8</button>
+        <button class="pin-btn" data-n="9">9</button>
+        <button class="pin-btn pin-empty" disabled></button>
+        <button class="pin-btn" data-n="0">0</button>
+        <button class="pin-btn pin-back" id="pin-backspace">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
