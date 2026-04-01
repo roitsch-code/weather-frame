@@ -50,7 +50,8 @@ body {
 .sun-wrap, .cloud-wrap, .butterfly-wrap,
 .tree-wrap, .leaf-wrap, .petal-wrap,
 .rain-wrap, .snow-wrap, .confetti-wrap,
-.fog-wrap, .lightning-wrap, .puddles {
+.fog-wrap, .lightning-wrap, .puddles,
+.night-wrap {
   display: none;
 }
 
@@ -97,6 +98,10 @@ body.scene-winter .snow-wrap { display: block; }
 /* Weekend: confetti + stars */
 body.scene-weekend .confetti-wrap { display: block; }
 
+/* Sleepy: moon + JS night-stars (reuse snow-wrap) */
+body.scene-sleepy .night-wrap { display: block; }
+body.scene-sleepy .snow-wrap  { display: block; }
+
 /* ─── 4. Sky Gradients ─────────────────────────────── */
 body.scene-sunny        .sky-layer { background: linear-gradient(to bottom, #5BA4D4 0%, #87CEEB 45%, #C8EBF5 100%); }
 body.scene-spring       .sky-layer { background: linear-gradient(to bottom, #74b9e8 0%, #a8d8f0 40%, #c8f0d8 100%); }
@@ -107,6 +112,7 @@ body.scene-foggy        .sky-layer { background: linear-gradient(to bottom, #7a8
 body.scene-cloudy       .sky-layer { background: linear-gradient(to bottom, #5a6878 0%, #7a8898 40%, #9aaab8 100%); }
 body.scene-windy        .sky-layer { background: linear-gradient(to bottom, #4a9ac8 0%, #70bae0 40%, #a0d4f0 100%); }
 body.scene-winter       .sky-layer { background: linear-gradient(to bottom, #7fb3d3 0%, #aed6f1 40%, #d6eaf8 75%, #eaf4fc 100%); }
+body.scene-sleepy       .sky-layer { background: linear-gradient(to bottom, #020410 0%, #06091e 30%, #0c1138 65%, #151a4a 100%); }
 body.scene-weekend      .sky-layer { background: linear-gradient(to bottom, #3b2fa0 0%, #5e3aad 35%, #9b5fc0 70%, #c77ddb 100%); }
 
 /* ─── 5. Ground Layer ──────────────────────────────── */
@@ -138,6 +144,9 @@ body.scene-winter  .ground-layer {
   background: linear-gradient(to top, #b8d8ef 0%, #d6eaf8 60%, #edf7ff 100%);
   height: 16vh;
   border-radius: 55% 45% 0 0 / 30px 25px 0 0;
+}
+body.scene-sleepy  .ground-layer {
+  background: linear-gradient(to top, #080e06 0%, #101808 60%, #192212 100%);
 }
 body.scene-weekend .ground-layer {
   background: linear-gradient(to top, #2a1a7a 0%, #4f3aad 60%, #6d28d9 100%);
@@ -603,6 +612,87 @@ body.scene-thunderstorm .raindrop {
   padding: 2.8vh 3.5vw;
 }
 
+/* ─── Sky tint: dawn / dusk warm overlay ──────────────── */
+.sky-tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: transparent;
+  transition: background 3s ease;
+}
+/* Dawn — pink-gold blush from bottom */
+body.time-dawn:not(.scene-sleepy) .sky-tint {
+  background: linear-gradient(to top,
+    rgba(255, 115, 40, 0.32) 0%,
+    rgba(255,  80, 20, 0.16) 35%,
+    transparent 70%);
+}
+/* Dusk — warm amber-violet from bottom */
+body.time-dusk:not(.scene-sleepy):not(.scene-thunderstorm) .sky-tint {
+  background: linear-gradient(to top,
+    rgba(255,  85, 15, 0.38) 0%,
+    rgba(210,  50,  0, 0.22) 35%,
+    rgba(130,  30, 85, 0.10) 65%,
+    transparent 100%);
+}
+
+/* ─── Night: moon & stars ──────────────────────────────── */
+.night-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.moon {
+  position: absolute;
+  top: 7%;
+  right: 11%;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #fffce8;
+  box-shadow:
+    0 0 14px rgba(255, 250, 200, 0.85),
+    0 0 38px rgba(255, 240, 150, 0.45),
+    0 0 70px rgba(255, 220, 100, 0.18);
+  animation: moon-glow 5s ease-in-out infinite;
+}
+
+/* Crescent shadow (dark bite from one side) */
+.moon::before {
+  content: '';
+  position: absolute;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #06091e; /* matches night sky */
+  top: -4px;
+  left: 12px;
+}
+
+/* JS-spawned night stars (go into snow-wrap, reuse sparkle anim) */
+.night-star {
+  position: absolute;
+  user-select: none;
+  line-height: 1;
+  animation: sparkle ease-in-out infinite;
+}
+
+/* JS-spawned fireflies */
+.firefly {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(155, 255, 90, 0.9);
+  box-shadow:
+    0 0 6px  rgba(155, 255, 90, 0.85),
+    0 0 14px rgba(120, 255, 70, 0.45);
+  animation: glow-float ease-in-out infinite;
+}
+
 /* ── Clock block (top-left): day · time · temperature ── */
 #clock-block {
   display: inline-flex;
@@ -636,7 +726,8 @@ body.scene-thunderstorm .raindrop {
   letter-spacing: -0.02em;
 }
 
-#temperature {
+/* Feels-like (apparent) temp — primary, large */
+#feels-like {
   font-size: clamp(2rem, 5vw, 3.8rem);
   font-weight: 900;
   color: white;
@@ -645,6 +736,16 @@ body.scene-thunderstorm .raindrop {
     0 1px 4px rgba(0, 0, 0, 0.40);
   line-height: 1;
   letter-spacing: -0.02em;
+}
+
+/* Real temp — secondary, small, dimmed */
+#temperature {
+  font-size: clamp(0.8rem, 1.6vw, 1.2rem);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.62);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.40);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
 }
 
 /* ── Weather block (top-right): emoji only ── */
@@ -657,7 +758,13 @@ body.scene-thunderstorm .raindrop {
   font-size: clamp(5rem, 11vw, 9rem);
   line-height: 1;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+  /* Tappable for weekend-override — needs explicit pointer-events
+     because #ui-overlay has pointer-events: none */
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.15s ease;
 }
+#weather-emoji:active { transform: scale(0.88); }
 
 /* ─── 18. Characters ───────────────────────────────── */
 #characters {
@@ -933,4 +1040,32 @@ body.scene-thunderstorm .raindrop {
   0%,  4%, 7%, 100% { opacity: 0; }
   2%                { opacity: 0.75; }
   5%                { opacity: 0.35; }
+}
+
+/* Moon soft glow pulse */
+@keyframes moon-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 14px rgba(255, 250, 200, 0.85),
+      0 0 38px rgba(255, 240, 150, 0.45),
+      0 0 70px rgba(255, 220, 100, 0.18);
+  }
+  50% {
+    box-shadow:
+      0 0 22px rgba(255, 252, 210, 0.95),
+      0 0 55px rgba(255, 245, 160, 0.60),
+      0 0 95px rgba(255, 225, 110, 0.28);
+  }
+}
+
+/* Firefly glow-float */
+@keyframes glow-float {
+  0%   { transform: translate( 0px,   0px);  opacity: 0.12;
+         box-shadow: 0 0  4px rgba(155,255,90,0.5); }
+  28%  { transform: translate(14px, -22px);  opacity: 0.95;
+         box-shadow: 0 0 10px rgba(155,255,90,1), 0 0 22px rgba(120,255,70,0.6); }
+  55%  { transform: translate(-9px, -36px);  opacity: 0.40; }
+  80%  { transform: translate(17px, -18px);  opacity: 0.88;
+         box-shadow: 0 0  9px rgba(155,255,90,0.9); }
+  100% { transform: translate( 0px,   0px);  opacity: 0.12; }
 }
