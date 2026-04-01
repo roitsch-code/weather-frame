@@ -11,7 +11,7 @@ const PIN_DAYS = 30;     // days before asking again
 // ─── API ─────────────────────────────────────────────
 const API_URL =
   'https://api.open-meteo.com/v1/forecast' +
-  '?latitude=51.2217&longitude=6.7762' +
+  '?latitude=51.22&longitude=6.78' +
   '&current=temperature_2m,apparent_temperature,precipitation,' +
   'weathercode,windspeed_10m,cloudcover,is_day' +
   '&daily=sunrise,sunset' +
@@ -586,6 +586,14 @@ function pinCheck() {
 // ─── Helpers ──────────────────────────────────────────
 function rand(min, max) { return Math.random() * (max - min) + min; }
 function pick(arr)      { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ─── Auto-reload for code deploys ────────────────────
+// Reloads every 30 min to pick up new GitHub Pages deploys.
+// Skipped if the PIN overlay is currently visible (prevents interrupting entry).
+setInterval(() => {
+  const pinVisible = document.getElementById('pin-overlay').style.display !== 'none';
+  if (!pinVisible) location.reload();
+}, 30 * 60 * 1000);
 
 // ─── Boot ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', init);
