@@ -33,6 +33,7 @@ const RAINY_CODES = new Set([
 ]);
 const THUNDER_CODES = new Set([95, 96, 99]);
 const FOG_CODES     = new Set([45, 48]);
+const SNOW_CODES    = new Set([71, 73, 75, 77, 85, 86]); // actual snowfall WMO codes
 
 const CONFETTI_COLORS = [
   '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff',
@@ -324,7 +325,7 @@ function updateUI(tempRaw, apparentRaw, weatherCode, windSpeed, cloudCover) {
     _currentScene     = getScene(outfit, weatherCode, windSpeed);
     _currentTimeOfDay = getTimeOfDay(now, _sunriseISO, _sunsetISO);
     applyBodyClasses();
-    renderParticles(_currentScene);
+    renderParticles(_currentScene, weatherCode);
   }
 
   // Always update cloud density (smooth transition)
@@ -370,7 +371,7 @@ function adjustClouds(cloudCover, scene) {
 }
 
 // ─── Particle renderer ────────────────────────────────
-function renderParticles(scene) {
+function renderParticles(scene, code = 0) {
   $rainWrap.innerHTML  = '';
   $leafWrap.innerHTML  = '';
   $petalWrap.innerHTML = '';
@@ -428,7 +429,8 @@ function renderParticles(scene) {
     }
   }
 
-  if (scene === 'scene-winter') {
+  // Only spawn snowflakes if it is actually snowing (WMO code confirms precipitation)
+  if (scene === 'scene-winter' && SNOW_CODES.has(code)) {
     for (let i = 0; i < 48; i++) {
       const s = document.createElement('div');
       s.className   = 'snowflake';
