@@ -14,7 +14,9 @@ const API_URL =
   '?latitude=51.22&longitude=6.78' +
   '&current=temperature_2m,apparent_temperature,precipitation,' +
   'weathercode,windspeed_10m,cloudcover,is_day' +
+  '&hourly=apparent_temperature,temperature_2m,precipitation,weathercode,windspeed_10m' +
   '&daily=sunrise,sunset' +
+  '&forecast_days=1' +
   '&timezone=Europe%2FBerlin';
 
 const REFRESH_MS = 30 * 60 * 1000; // 30 minutes
@@ -151,6 +153,15 @@ function resolveEmojiKey(outfit, code, windSpeed) {
 // ─── Daily outfit variants ───────────────────────────
 const DAILY_VARIANT_OUTFITS = new Set(['Spring_Fall_Mild']);
 
+// ─── Forecast strip slots ────────────────────────────
+// label, start hour (inclusive), end hour (exclusive)
+const FORECAST_SLOTS = [
+  { label: 'Morgens',    startH: 6,  endH: 11 },
+  { label: 'Mittags',    startH: 11, endH: 14 },
+  { label: 'Nachmittag', startH: 14, endH: 17 },
+  { label: 'Abends',     startH: 17, endH: 19 },
+];
+
 function getDailyVariantIndex() {
   const d = new Date();
   const days = d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate();
@@ -181,6 +192,7 @@ let _lastCloud      = null;
 let _lastHour       = -1;
 let _sunriseISO     = null;
 let _sunsetISO      = null;
+let _hourlyData     = null; // cached hourly forecast
 
 // ─── DOM refs ────────────────────────────────────────
 const $clock      = document.getElementById('clock');
@@ -262,6 +274,9 @@ function updateClock() {
     // Re-render with fresh time
     if (_lastTemp !== null) {
       updateUI(_lastTemp, _lastApparent, _lastCode, _lastWind, _lastCloud);
+    } else {
+      // At minimum refresh the forecast strip visibility (slot disappearance)
+      updateForecastStrip(now);
     }
   }
 }
@@ -280,11 +295,115 @@ async function fetchWeather() {
       _sunsetISO  = data.daily.sunset[0]  || null;
     }
 
+    // Cache hourly forecast for smart outfit + strip
+    if (data.hourly) {
+      _hourlyData = data.hourly;
+    }
+
     updateUI(c.temperature_2m, c.apparent_temperature, c.weathercode,
              c.windspeed_10m, c.cloudcover);
   } catch (err) {
     console.warn('Weather fetch failed:', err.message);
   }
+}
+
+// ─── Smart outfit helpers ─────────────────────────────
+
+// Returns the minimum apparent_temperature in the next 3 hours (falls back to rawApparent)
+function getSmartApparentTemp(hourlyData, rawApparent, now) {
+  if (!hourlyData || !hourlyData.time) return rawApparent;
+  const nowMs = now.getTime();
+  const cap   = nowMs + 3 * 60 * 60 * 1000; // now + 3 h
+  let min = rawApparent;
+  for (let i = 0; i < hourlyData.time.length; i++) {
+    const tMs = new Date(hourlyData.time[i]).getTime();
+    if (tMs >= nowMs && tMs <= cap) {
+      const v = hourlyData.apparent_temperature[i];
+      if (v !== null && v < min) min = v;
+    }
+  }
+  return min;
+}
+
+// Returns true if total precipitation in next 3 h > 2mm AND a rainy WMO code is present
+function isHeavyRainAhead(hourlyData, now) {
+  if (!hourlyData || !hourlyData.time) return false;
+  const nowMs = now.getTime();
+  const cap   = nowMs + 3 * 60 * 60 * 1000;
+  let totalPrecip  = 0;
+  let hasRainyCode = false;
+  for (let i = 0; i < hourlyData.time.length; i++) {
+    const tMs = new Date(hourlyData.time[i]).getTime();
+    if (tMs >= nowMs && tMs <= cap) {
+      totalPrecip  += hourlyData.precipitation[i] ?? 0;
+      const code    = hourlyData.weathercode[i];
+      if (RAINY_CODES.has(code) || THUNDER_CODES.has(code)) hasRainyCode = true;
+    }
+  }
+  return hasRainyCode && totalPrecip > 2;
+}
+
+// ─── Forecast strip helpers ───────────────────────────
+
+function buildForecastSlots(hourlyData, now) {
+  if (!hourlyData || !hourlyData.time) return null;
+  const curH = now.getHours();
+
+  return FORECAST_SLOTS.map(slot => {
+    if (slot.endH <= curH) return null; // slot has fully passed
+
+    const indices = [];
+    for (let i = 0; i < hourlyData.time.length; i++) {
+      const h = new Date(hourlyData.time[i]).getHours();
+      if (h >= slot.startH && h < slot.endH) indices.push(i);
+    }
+    if (indices.length === 0) return null;
+
+    const apparents = indices.map(i => hourlyData.apparent_temperature[i]).filter(v => v !== null);
+    const codes     = indices.map(i => hourlyData.weathercode[i]).filter(v => v !== null);
+    const winds     = indices.map(i => hourlyData.windspeed_10m[i]).filter(v => v !== null);
+
+    if (apparents.length === 0) return null;
+
+    const minTemp = Math.round(Math.min(...apparents));
+    const maxTemp = Math.round(Math.max(...apparents));
+
+    const codeRank = c =>
+      THUNDER_CODES.has(c) ? 5 : RAINY_CODES.has(c) ? 4 :
+      SNOW_CODES.has(c)    ? 3 : FOG_CODES.has(c)   ? 2 : 0;
+    const dominantCode = [...codes].sort((a, b) => codeRank(b) - codeRank(a))[0] ?? 0;
+    const avgWind = winds.length ? winds.reduce((s, v) => s + v, 0) / winds.length : 0;
+
+    const emojiKey = resolveEmojiKey(null, dominantCode, avgWind);
+    const emoji    = EMOJI_MAP[emojiKey]?.text ?? '☁️';
+
+    return {
+      label:     slot.label,
+      emoji,
+      minTemp,
+      maxTemp,
+      isCurrent: curH >= slot.startH && curH < slot.endH,
+    };
+  }).filter(Boolean);
+}
+
+function updateForecastStrip(now) {
+  const strip = document.getElementById('forecast-strip');
+  if (!strip) return;
+
+  const hour = now.getHours();
+  if (hour >= 19 || hour < 6) { strip.style.display = 'none'; return; }
+  strip.style.display = '';
+
+  const slots = buildForecastSlots(_hourlyData, now);
+  if (!slots || slots.length === 0) { strip.style.display = 'none'; return; }
+
+  strip.innerHTML = slots.map(s => `
+    <div class="forecast-slot${s.isCurrent ? ' forecast-current' : ''}">
+      <span class="fs-label">${s.label}</span>
+      <span class="fs-emoji">${s.emoji}</span>
+      <span class="fs-temp">${s.minTemp}°–${s.maxTemp}°</span>
+    </div>`).join('');
 }
 
 // ─── Update UI ────────────────────────────────────────
@@ -297,7 +416,12 @@ function updateUI(tempRaw, apparentRaw, weatherCode, windSpeed, cloudCover) {
   _lastTemp = tempRaw; _lastApparent = apparentRaw;
   _lastCode = weatherCode; _lastWind = windSpeed; _lastCloud = cloudCover;
 
-  const outfit    = determineOutfit(apparentRaw ?? tempRaw, weatherCode, now);
+  const smartTemp = getSmartApparentTemp(_hourlyData, apparentRaw ?? tempRaw, now);
+  const rainGear  = isHeavyRainAhead(_hourlyData, now);
+  // If heavy rain is coming but current code isn't rainy yet, inject code 61 (moderate rain)
+  const effectiveCode = rainGear && !RAINY_CODES.has(weatherCode) && !THUNDER_CODES.has(weatherCode)
+                        ? 61 : weatherCode;
+  const outfit    = determineOutfit(smartTemp, effectiveCode, now);
   const outfitSrc = resolveOutfitSrc(outfit);
 
   // Update temperatures
@@ -330,6 +454,9 @@ function updateUI(tempRaw, apparentRaw, weatherCode, windSpeed, cloudCover) {
 
   // Always update cloud density (smooth transition)
   adjustClouds(cloudCover ?? 50, _currentScene);
+
+  // Update forecast strip
+  updateForecastStrip(now);
 }
 
 // ─── Outfit logic (priority order) ───────────────────

@@ -723,6 +723,49 @@ body.time-dusk:not(.scene-sleepy):not(.scene-thunderstorm) .sky-tint {
   letter-spacing: 0.01em;
 }
 
+/* ── Forecast Strip ─────────────────────────────────── */
+#forecast-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18em;
+  margin-top: 0.55em;
+  pointer-events: none;
+}
+
+.forecast-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 999px;
+  padding: 0.12em 0.65em;
+  backdrop-filter: blur(4px);
+  opacity: 0.70;
+  transition: opacity 0.4s;
+}
+.forecast-slot.forecast-current {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.fs-label {
+  font-size: clamp(0.52rem, 1.05vw, 0.76rem);
+  font-weight: 700;
+  color: #fff;
+  min-width: 5.5em;
+  white-space: nowrap;
+}
+.fs-emoji {
+  font-size: clamp(0.62rem, 1.2vw, 0.88rem);
+  line-height: 1;
+}
+.fs-temp {
+  font-size: clamp(0.52rem, 1.05vw, 0.76rem);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.90);
+  white-space: nowrap;
+}
+
 /* ── Weather block (top-right): emoji only ── */
 #weather-block {
   display: flex;
