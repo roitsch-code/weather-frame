@@ -38,8 +38,6 @@ function getApiUrl() {
 }
 
 const REFRESH_MS = 15 * 60 * 1000; // 15 min — weather fetch interval
-const RELOAD_MS  = 30 * 60 * 1000; // 30 min — reload after fetch (picks up new deploys)
-let   _lastReloadMs = Date.now();  // tracks when we last reloaded
 
 // ─── Lookup tables ───────────────────────────────────
 const DAYS_DE = [
@@ -332,15 +330,6 @@ async function fetchWeather() {
 
     updateUI(c.temperature_2m, c.apparent_temperature, c.weathercode,
              c.windspeed_10m, c.cloudcover);
-
-    // If 30 min have passed, reload 5 s after the fetch so the UI shows
-    // fresh data for a moment before the page restarts with new code.
-    if (Date.now() - _lastReloadMs >= RELOAD_MS) {
-      setTimeout(() => {
-        const pinVisible = document.getElementById('pin-overlay').style.display !== 'none';
-        if (!pinVisible) location.reload();
-      }, 5000);
-    }
   } catch (err) {
     console.warn('Weather fetch failed:', err.message);
   }
