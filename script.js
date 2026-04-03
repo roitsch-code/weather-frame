@@ -9,17 +9,36 @@ const PIN_CODE = '1234'; // ← change to your 4-digit PIN
 const PIN_DAYS = 30;     // days before asking again
 
 // ─── API ─────────────────────────────────────────────
-const API_URL =
-  'https://api.open-meteo.com/v1/forecast' +
-  '?latitude=51.22&longitude=6.78' +
-  '&current=temperature_2m,apparent_temperature,precipitation,' +
-  'weathercode,windspeed_10m,cloudcover,is_day' +
-  '&hourly=apparent_temperature,temperature_2m,precipitation,weathercode,windspeed_10m' +
-  '&daily=sunrise,sunset' +
-  '&forecast_days=1' +
-  '&timezone=Europe%2FBerlin';
+// ─── Location (with temporary override) ──────────────
+const LOCATION_DÜSSELDORF = { lat: 51.22, lon: 6.78 };
 
-const REFRESH_MS = 30 * 60 * 1000; // 30 minutes
+// Temporary away location — remove or update for future trips
+const LOCATION_OVERRIDE = {
+  label:   'Emmerich am Rhein',
+  lat:     51.84,
+  lon:     6.25,
+  startMs: new Date('2026-04-04T16:00:00+02:00').getTime(),
+  endMs:   new Date('2026-04-06T20:00:00+02:00').getTime(),
+};
+
+function getApiUrl() {
+  const now = Date.now();
+  const loc =
+    (now >= LOCATION_OVERRIDE.startMs && now < LOCATION_OVERRIDE.endMs)
+      ? LOCATION_OVERRIDE
+      : LOCATION_DÜSSELDORF;
+  return 'https://api.open-meteo.com/v1/forecast' +
+    `?latitude=${loc.lat}&longitude=${loc.lon}` +
+    '&current=temperature_2m,apparent_temperature,precipitation,' +
+    'weathercode,windspeed_10m,cloudcover,is_day' +
+    '&hourly=apparent_temperature,temperature_2m,precipitation,weathercode,windspeed_10m' +
+    '&daily=sunrise,sunset' +
+    '&forecast_days=1' +
+    '&timezone=Europe%2FBerlin';
+}
+
+const REFRESH_MS = 15 * 60 * 1000; // 15 min — weather fetch
+const RELOAD_MS  = 30 * 60 * 1000; // 30 min — full page reload (picks up new deploys)
 
 // ─── Lookup tables ───────────────────────────────────
 const DAYS_DE = [
@@ -51,11 +70,17 @@ const PETAL_COLORS = [
 ];
 
 // ─── Season helper ───────────────────────────────────
+// Winter: Dec–Mar 31 | Spring: Apr–May | Summer: Jun–Aug | Fall: Sep–Nov 15
+// Winter resumes Nov 16+
 function getCurrentSeason() {
-  const m = new Date().getMonth();
-  if (m >= 2 && m <= 4) return 'spring';
-  if (m >= 5 && m <= 7) return 'summer';
-  if (m >= 8 && m <= 10) return 'fall';
+  const now = new Date();
+  const m   = now.getMonth(); // 0-based
+  const d   = now.getDate();
+  if (m === 11 || m <= 2)             return 'winter'; // Dec, Jan, Feb, Mar
+  if (m === 3 || m === 4)             return 'spring'; // Apr, May
+  if (m >= 5 && m <= 7)              return 'summer'; // Jun–Aug
+  if (m === 8 || m === 9)            return 'fall';   // Sep, Oct
+  if (m === 10) return d <= 15 ? 'fall' : 'winter';   // Nov 1-15 fall, 16+ winter
   return 'winter';
 }
 
@@ -70,15 +95,15 @@ function isoToMinutes(isoStr) {
 }
 
 // Returns 'dawn' | 'day' | 'dusk' | 'night'
-// Note: 'night' here means pre-dawn (< 07:00); after 19:00 is handled by Sleepy outfit
+// Note: 'night' here means pre-dawn (< 06:00); after 18:30 is handled by Sleepy outfit
 function getTimeOfDay(now, sunriseISO, sunsetISO) {
   const h      = now.getHours();
   const nowMin = h * 60 + now.getMinutes();
   const srMin  = isoToMinutes(sunriseISO);
   const ssMin  = isoToMinutes(sunsetISO);
 
-  if (h < 6)  return 'night'; // before kids wake up
-  if (h >= 19) return 'night'; // after kids' bedtime (Sleepy mode handles outfit)
+  if (h < 6)          return 'night'; // before kids wake up
+  if (nowMin >= 18*60+30) return 'night'; // after 18:30 — Sleepy mode
 
   if (srMin !== null && nowMin < srMin + 55) return 'dawn';
   if (ssMin !== null && nowMin > ssMin - 70)  return 'dusk';
@@ -151,7 +176,22 @@ function resolveEmojiKey(outfit, code, windSpeed) {
 }
 
 // ─── Daily outfit variants ───────────────────────────
-const DAILY_VARIANT_OUTFITS = new Set(['Spring_Fall_Mild']);
+// Lists variant suffixes per outfit per character (null = no suffix = original image)
+const OUTFIT_VARIANTS = {
+  'Sleepy':           { lio: [null, '_2', '_3', '_4'],        mika: [null, '_2', '_3', '_4', '_5'] },
+  'Spring_Fall_Mild': { lio: [null, '_2', '_4'],              mika: [null] },
+  'Spring_Fall_Warm': { lio: [null, '_2'],                    mika: [null, '_2'] },
+};
+
+function getDailyVariantSuffix(outfit, character) {
+  const entry = OUTFIT_VARIANTS[outfit];
+  if (!entry) return '';
+  const list = entry[character];
+  if (!list || list.length <= 1) return '';
+  const d   = new Date();
+  const idx = (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % list.length;
+  return list[idx] ?? '';
+}
 
 // ─── Forecast strip slots ────────────────────────────
 // label, start hour (inclusive), end hour (exclusive)
@@ -162,23 +202,11 @@ const FORECAST_SLOTS = [
   { label: 'Abends',     startH: 17, endH: 19 },
 ];
 
-function getDailyVariantIndex() {
-  const d = new Date();
-  const days = d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate();
-  return days % 2;
-}
-
-function resolveOutfitSrc(outfit) {
-  if (DAILY_VARIANT_OUTFITS.has(outfit) && getDailyVariantIndex() === 1) {
-    return outfit + '_2';
-  }
-  return outfit;
-}
-
 // ─── State ───────────────────────────────────────────
 let _currentScene      = 'scene-spring';
 let _currentTimeOfDay  = 'day';
-let currentOutfit      = null; // effective src (may include _2)
+let currentLioOutfit   = null; // effective src for Lio (may include _2/_3/etc.)
+let currentMikaOutfit  = null; // effective src for Mika
 let currentCode        = null;
 let currentWind        = null;
 let weekendOverride    = false;
@@ -227,7 +255,8 @@ function initWeekendOverride() {
     if (isWeekendMorning && !weekendOverride) {
       weekendOverride = true;
       // Force re-render with override active
-      currentOutfit = null;
+      currentLioOutfit = null;
+      currentMikaOutfit = null;
       if (_lastTemp !== null) {
         updateUI(_lastTemp, _lastApparent, _lastCode, _lastWind, _lastCloud);
       }
@@ -284,7 +313,7 @@ function updateClock() {
 // ─── Weather fetch ────────────────────────────────────
 async function fetchWeather() {
   try {
-    const res  = await fetch(API_URL);
+    const res  = await fetch(getApiUrl());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     const c    = data.current;
@@ -391,8 +420,9 @@ function updateForecastStrip(now) {
   const strip = document.getElementById('forecast-strip');
   if (!strip) return;
 
-  const hour = now.getHours();
-  if (hour >= 19 || hour < 6) { strip.style.display = 'none'; return; }
+  const hour   = now.getHours();
+  const nowMin = hour * 60 + now.getMinutes();
+  if (nowMin >= 18*60+30 || hour < 6) { strip.style.display = 'none'; return; }
   strip.style.display = '';
 
   const slots = buildForecastSlots(_hourlyData, now);
@@ -421,8 +451,9 @@ function updateUI(tempRaw, apparentRaw, weatherCode, windSpeed, cloudCover) {
   // If heavy rain is coming but current code isn't rainy yet, inject code 61 (moderate rain)
   const effectiveCode = rainGear && !RAINY_CODES.has(weatherCode) && !THUNDER_CODES.has(weatherCode)
                         ? 61 : weatherCode;
-  const outfit    = determineOutfit(smartTemp, effectiveCode, now);
-  const outfitSrc = resolveOutfitSrc(outfit);
+  const outfit   = determineOutfit(smartTemp, effectiveCode, now);
+  const lioSrc   = outfit + getDailyVariantSuffix(outfit, 'lio');
+  const mikaSrc  = outfit + getDailyVariantSuffix(outfit, 'mika');
 
   // Update temperatures
   $feelsLike.textContent = `${felt}°`;
@@ -432,17 +463,19 @@ function updateUI(tempRaw, apparentRaw, weatherCode, windSpeed, cloudCover) {
 
   // Re-render scene + characters when state changes
   const sceneChanged =
-    outfitSrc     !== currentOutfit ||
-    weatherCode   !== currentCode   ||
-    (windSpeed > 30) !== (currentWind > 30);
+    lioSrc              !== currentLioOutfit  ||
+    mikaSrc             !== currentMikaOutfit ||
+    weatherCode         !== currentCode       ||
+    (windSpeed > 30)    !== (currentWind > 30);
 
   if (sceneChanged) {
-    currentOutfit = outfitSrc;
-    currentCode   = weatherCode;
-    currentWind   = windSpeed;
+    currentLioOutfit  = lioSrc;
+    currentMikaOutfit = mikaSrc;
+    currentCode       = weatherCode;
+    currentWind       = windSpeed;
 
-    $lio.src  = `images/Lio_${outfitSrc}.png`;
-    $mika.src = `images/Mika_${outfitSrc}.png`;
+    $lio.src  = `images/Lio_${lioSrc}.png`;
+    $mika.src = `images/Mika_${mikaSrc}.png`;
     $lio.style.visibility  = 'visible';
     $mika.style.visibility = 'visible';
 
@@ -461,20 +494,27 @@ function updateUI(tempRaw, apparentRaw, weatherCode, windSpeed, cloudCover) {
 
 // ─── Outfit logic (priority order) ───────────────────
 function determineOutfit(temp, code, now) {
-  const day  = now.getDay();
-  const hour = now.getHours();
+  const day    = now.getDay();
+  const hour   = now.getHours();
+  const minute = now.getMinutes();
+  const m      = now.getMonth();
+  const d      = now.getDate();
 
-  const isSleepy         = hour >= 19 || hour < 6;
-  const isWeekendMorning = (day === 0 || day === 6) && hour >= 6 && hour < 12;
+  // Sleepy: 18:30–06:00
+  const isSleepy         = (hour > 18 || (hour === 18 && minute >= 30)) || hour < 6;
+  const isWeekendMorning = (day === 0 || day === 6) && hour >= 6 && hour < 12 && !(hour === 18 && minute >= 30);
   const isRainy          = RAINY_CODES.has(code) || THUNDER_CODES.has(code);
+
+  // Winter outfit only valid Dec–Mar and Nov 16+; Apr–Nov 15 use Spring_Fall_Cold instead
+  const isCalendarWinter = m === 11 || m <= 2 || (m === 10 && d > 15);
 
   if (isSleepy)                              return 'Sleepy';
   if (isWeekendMorning && !weekendOverride)  return 'Weekend';
   if (isRainy && temp > 20)                  return 'Summer_Rainy';
   if (isRainy && temp > 3)                   return 'Rainy';
-  if (temp <= 3)                             return 'Winter_Cold';
+  if (temp <= 3 && isCalendarWinter)         return 'Winter_Cold';
   if (temp <= 10)                            return 'Spring_Fall_Cold';
-  if (temp <= 15)                            return 'Spring_Fall_Mild'; // was 16
+  if (temp <= 15)                            return 'Spring_Fall_Mild';
   if (temp <= 20)                            return 'Spring_Fall_Warm';
   if (temp <= 25)                            return 'Summer_Warm';
   return 'Summer_Hot';
@@ -722,7 +762,7 @@ function pick(arr)      { return arr[Math.floor(Math.random() * arr.length)]; }
 setInterval(() => {
   const pinVisible = document.getElementById('pin-overlay').style.display !== 'none';
   if (!pinVisible) location.reload();
-}, 30 * 60 * 1000);
+}, RELOAD_MS);
 
 // ─── Boot ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', init);
