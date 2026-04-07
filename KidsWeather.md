@@ -107,8 +107,8 @@ Some outfits rotate daily so the kids look a bit different each day:
 | Outfit | Lio variants | Mika variants |
 |---|---|---|
 | Sleepy | 4 | 5 |
-| Spring_Fall_Mild | 3 | 1 |
-| Spring_Fall_Warm | 2 | 2 |
+| Spring_Fall_Mild | 3 | 2 |
+| Spring_Fall_Warm | 4 | 4 |
 
 ---
 

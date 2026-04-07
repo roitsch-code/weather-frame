@@ -824,9 +824,9 @@ function determineOutfit(playComfort, rainClothing, code, now) {
 
 // null = no suffix (original image); '_2' = _2 variant, etc.
 const OUTFIT_VARIANTS = {
-  'Sleepy':           { lio: [null, '_2', '_3', '_4'],  mika: [null, '_2', '_3', '_4', '_5'] },
-  'Spring_Fall_Mild': { lio: [null, '_2', '_4'],        mika: [null] },
-  'Spring_Fall_Warm': { lio: [null, '_2'],              mika: [null, '_2'] },
+  'Sleepy':           { lio: [null, '_2', '_3', '_4'],        mika: [null, '_2', '_3', '_4', '_5'] },
+  'Spring_Fall_Mild': { lio: [null, '_2', '_4'],              mika: [null, '_2'] },
+  'Spring_Fall_Warm': { lio: [null, '_2', '_3', '_4'],        mika: [null, '_2', '_3', '_4'] },
 };
 
 function getDailyVariantSuffix(outfit, character) {
