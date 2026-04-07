@@ -309,6 +309,16 @@ function updateClock() {
   }
 }
 
+// ─── Weather cache (localStorage) ────────────────────
+const WX_CACHE_KEY = 'wf_last_weather';
+
+function saveWeatherCache(payload) {
+  try { localStorage.setItem(WX_CACHE_KEY, JSON.stringify(payload)); } catch (_) {}
+}
+function loadWeatherCache() {
+  try { return JSON.parse(localStorage.getItem(WX_CACHE_KEY) || 'null'); } catch (_) { return null; }
+}
+
 // ─── Weather fetch ────────────────────────────────────
 async function fetchWeather() {
   try {
@@ -317,6 +327,9 @@ async function fetchWeather() {
     const data = await res.json();
     const c    = data.current;
 
+    // Handle both 'weathercode' (old) and 'weather_code' (new) field names
+    const code = c.weather_code ?? c.weathercode ?? 0;
+
     // Cache today's sunrise / sunset
     if (data.daily) {
       _sunriseISO = data.daily.sunrise[0] || null;
@@ -324,14 +337,32 @@ async function fetchWeather() {
     }
 
     // Cache hourly forecast for smart outfit + strip
+    // Normalise hourly field name too
     if (data.hourly) {
+      data.hourly.weathercode = data.hourly.weathercode ?? data.hourly.weather_code ?? [];
       _hourlyData = data.hourly;
     }
 
-    updateUI(c.temperature_2m, c.apparent_temperature, c.weathercode,
+    const payload = {
+      temp: c.temperature_2m, apparent: c.apparent_temperature,
+      code, wind: c.windspeed_10m, cloud: c.cloudcover,
+      sunrise: _sunriseISO, sunset: _sunsetISO,
+      hourly: _hourlyData,
+    };
+    saveWeatherCache(payload);
+
+    updateUI(c.temperature_2m, c.apparent_temperature, code,
              c.windspeed_10m, c.cloudcover);
   } catch (err) {
     console.warn('Weather fetch failed:', err.message);
+    // Fall back to last known good data so the app still renders
+    const cached = loadWeatherCache();
+    if (cached && _lastTemp === null) {
+      if (cached.sunrise) _sunriseISO = cached.sunrise;
+      if (cached.sunset)  _sunsetISO  = cached.sunset;
+      if (cached.hourly)  _hourlyData = cached.hourly;
+      updateUI(cached.temp, cached.apparent, cached.code, cached.wind, cached.cloud);
+    }
   }
 }
 
