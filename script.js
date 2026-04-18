@@ -844,7 +844,7 @@ function determineOutfit(playComfort, rainClothing, code, now) {
 const OUTFIT_VARIANTS = {
   'Sleepy':           { lio: [null, '_2', '_3', '_4'],        mika: [null, '_2', '_3', '_4', '_5'] },
   'Spring_Fall_Mild': { lio: [null, '_2', '_4'],              mika: [null, '_2'] },
-  'Spring_Fall_Warm': { lio: [null, '_2', '_3', '_4'],        mika: [null, '_2', '_3', '_4'] },
+  'Spring_Fall_Warm': { lio: [null, '_2', '_3', '_4', '_bike'], mika: [null, '_2', '_3', '_4', '_bike'] },
 };
 
 function getDailyVariantSuffix(outfit, character) {
