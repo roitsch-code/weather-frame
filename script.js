@@ -725,12 +725,16 @@ function applyBodyClasses() {
   if (document.body.className !== next) document.body.className = next;
 }
 
-// Pick one of three scene variants. Rotates by day so the frame looks a bit
-// different from one day to the next — most visible on the weekend scene, but
-// also subtly varies spring / sunny / fall / cloudy palettes.
+// Pick one of three scene variants. Rotates A → B → C → A every
+// SCENE_VARIANT_CYCLE_MS so the frame shifts palette a few times over the
+// day ("every now and then") rather than locking in one mood per day.
+// Sky / ground / cloud all fade between variants thanks to their CSS
+// background transitions.
+const SCENE_VARIANT_CYCLE_MS = 90 * 60 * 1000; // ~90 minutes per variant
+
 function getSceneVariant(now) {
-  const doy = getDayOfYear(now);
-  return 'variant-' + ['a', 'b', 'c'][doy % 3];
+  const slot = Math.floor(now.getTime() / SCENE_VARIANT_CYCLE_MS) % 3;
+  return 'variant-' + ['a', 'b', 'c'][slot];
 }
 
 // ─── Pixar-style emoji renderer ───────────────────────────────────
@@ -1276,8 +1280,12 @@ function updateClock() {
 
   // Update time-of-day tint every second (smooth dawn/dusk transitions)
   const todNew = getTimeOfDay(now, _sunriseISO, _sunsetISO);
-  if (todNew !== _currentTimeOfDay) {
+  // Also advance the A/B/C variant rotation promptly — don't wait for the
+  // next 15-min weather refresh to pick up a variant boundary.
+  const variantNew = getSceneVariant(now);
+  if (todNew !== _currentTimeOfDay || variantNew !== _currentVariant) {
     _currentTimeOfDay = todNew;
+    _currentVariant   = variantNew;
     applyBodyClasses();
   }
 
