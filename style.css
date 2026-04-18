@@ -106,10 +106,10 @@ body.scene-sleepy .snow-wrap  { display: block; }
 body.scene-sunny        .sky-layer { background: linear-gradient(to bottom, #5BA4D4 0%, #87CEEB 45%, #C8EBF5 100%); }
 body.scene-spring       .sky-layer { background: linear-gradient(to bottom, #74b9e8 0%, #a8d8f0 40%, #c8f0d8 100%); }
 body.scene-fall         .sky-layer { background: linear-gradient(to bottom, #B85C20 0%, #D4722A 35%, #E8963C 65%, #F5C27A 100%); }
-body.scene-rainy        .sky-layer { background: linear-gradient(to bottom, #2d3748 0%, #4a5568 40%, #5a6a7a 100%); }
+body.scene-rainy        .sky-layer { background: linear-gradient(to bottom, #4a5766 0%, #6a7888 40%, #8090a0 100%); }
 body.scene-thunderstorm .sky-layer { background: linear-gradient(to bottom, #0d0d1a 0%, #1a1a30 40%, #252540 100%); }
 body.scene-foggy        .sky-layer { background: linear-gradient(to bottom, #7a8a95 0%, #9aacb8 40%, #b8c8d0 100%); }
-body.scene-cloudy       .sky-layer { background: linear-gradient(to bottom, #5a6878 0%, #7a8898 40%, #9aaab8 100%); }
+body.scene-cloudy       .sky-layer { background: linear-gradient(to bottom, #8a9aaa 0%, #aabbca 40%, #cad8e4 100%); }
 body.scene-windy        .sky-layer { background: linear-gradient(to bottom, #4a9ac8 0%, #70bae0 40%, #a0d4f0 100%); }
 body.scene-winter       .sky-layer { background: linear-gradient(to bottom, #7fb3d3 0%, #aed6f1 40%, #d6eaf8 75%, #eaf4fc 100%); }
 body.scene-sleepy       .sky-layer { background: linear-gradient(to bottom, #020410 0%, #06091e 30%, #0c1138 65%, #151a4a 100%); }
@@ -150,6 +150,71 @@ body.scene-sleepy  .ground-layer {
 }
 body.scene-weekend .ground-layer {
   background: linear-gradient(to top, #2a1a7a 0%, #4f3aad 60%, #6d28d9 100%);
+}
+
+/* ─── 5a. Scene variants ───────────────────────────────
+   A `variant-a|b|c` class rotates with the day of year so the frame looks
+   slightly different across days. Scenes without a variant rule fall back to
+   their default palette above. Weekend has the strongest variation. */
+
+/* Weekend — three distinct festive palettes */
+body.scene-weekend.variant-a .sky-layer {
+  background: linear-gradient(to bottom, #3b2fa0 0%, #5e3aad 35%, #9b5fc0 70%, #c77ddb 100%);
+}
+body.scene-weekend.variant-a .ground-layer {
+  background: linear-gradient(to top, #2a1a7a 0%, #4f3aad 60%, #6d28d9 100%);
+}
+/* Sunrise confetti party */
+body.scene-weekend.variant-b .sky-layer {
+  background: linear-gradient(to bottom, #ff6a3d 0%, #ff9a5a 30%, #ffc37a 60%, #ffe0a8 100%);
+}
+body.scene-weekend.variant-b .ground-layer {
+  background: linear-gradient(to top, #7a2a2a 0%, #b84c3a 60%, #e67a55 100%);
+}
+/* Mint-and-berry picnic */
+body.scene-weekend.variant-c .sky-layer {
+  background: linear-gradient(to bottom, #08a88a 0%, #3fc8a6 35%, #8ee9c8 70%, #e0fff4 100%);
+}
+body.scene-weekend.variant-c .ground-layer {
+  background: linear-gradient(to top, #134e3a 0%, #1f7a52 60%, #2da872 100%);
+}
+
+/* Spring — gentler variation */
+body.scene-spring.variant-b .sky-layer {
+  background: linear-gradient(to bottom, #85cff0 0%, #bce4f2 40%, #f2f8e4 100%);
+}
+body.scene-spring.variant-c .sky-layer {
+  background: linear-gradient(to bottom, #6ab0dc 0%, #9cd2ec 40%, #d6f4e8 100%);
+}
+body.scene-spring.variant-c .ground-layer {
+  background: linear-gradient(to top, #2a7a1a 0%, #44b830 60%, #65e04c 100%);
+}
+
+/* Sunny — shift sky warmth */
+body.scene-sunny.variant-b .sky-layer {
+  background: linear-gradient(to bottom, #4a9dcf 0%, #7bc5ea 45%, #c8f0fa 100%);
+}
+body.scene-sunny.variant-c .sky-layer {
+  background: linear-gradient(to bottom, #6ab5e0 0%, #9cd6f0 45%, #ddf4f8 100%);
+}
+body.scene-sunny.variant-c .ground-layer {
+  background: linear-gradient(to top, #336a20 0%, #52922e 60%, #6cb636 100%);
+}
+
+/* Fall — amber vs. russet */
+body.scene-fall.variant-b .sky-layer {
+  background: linear-gradient(to bottom, #a14818 0%, #c96428 35%, #e68538 65%, #f2b470 100%);
+}
+body.scene-fall.variant-c .sky-layer {
+  background: linear-gradient(to bottom, #8c3a14 0%, #b85820 35%, #db7830 65%, #efa860 100%);
+}
+
+/* Cloudy — two subtly different overcast moods */
+body.scene-cloudy.variant-b .sky-layer {
+  background: linear-gradient(to bottom, #94a3b2 0%, #b2c0cc 40%, #d2dde6 100%);
+}
+body.scene-cloudy.variant-c .sky-layer {
+  background: linear-gradient(to bottom, #9aaab8 0%, #b8c8d4 40%, #d8e2ea 100%);
 }
 
 /* ─── 5b. Spring Tree — cherry blossom override ────── */
@@ -238,17 +303,17 @@ body.scene-spring .cloud { background: rgba(255, 255, 255, 0.88); }
 /* Fall: warm amber tinted */
 body.scene-fall .cloud { background: rgba(220, 175, 110, 0.80); }
 
-/* Rainy: heavy dark grey */
-body.scene-rainy .cloud { background: rgba(55, 65, 81, 0.95); }
+/* Rainy: grey but not black — dark enough to read as "rain clouds" */
+body.scene-rainy .cloud { background: rgba(105, 118, 135, 0.95); }
 
-/* Thunderstorm: near-black */
-body.scene-thunderstorm .cloud { background: rgba(20, 22, 35, 0.98); }
+/* Thunderstorm: near-black — reserved for actual storms */
+body.scene-thunderstorm .cloud { background: rgba(30, 34, 50, 0.97); }
 
 /* Foggy: pale ghostly */
-body.scene-foggy .cloud { background: rgba(175, 190, 200, 0.55); }
+body.scene-foggy .cloud { background: rgba(195, 208, 218, 0.60); }
 
-/* Cloudy: medium grey */
-body.scene-cloudy .cloud { background: rgba(120, 138, 155, 0.92); }
+/* Cloudy (overcast but dry): light grey, almost white */
+body.scene-cloudy .cloud { background: rgba(220, 226, 234, 0.94); }
 
 /* Windy: bright white, faster */
 body.scene-windy .cloud { background: rgba(245, 250, 255, 0.95); }

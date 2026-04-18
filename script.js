@@ -59,6 +59,12 @@ const RAIN_IMMINENT_MM         = 0.2; // show rain scene if next-30-min forecast
 const RAIN_CLOTHING_CURRENT_MM = 0.3; // rain gear if current precip ≥ this (mm/h)
 const RAIN_CLOTHING_1H_MM      = 1.0; // rain gear if 60-min total ≥ this + rainy WMO code
 
+// ─── Outfit temperature rules (tunable) ───────────────────────────
+// When picking what the kids wear, cap how much of the "sun bonus" counts.
+// Without this, a shady 16 °C with bright sun reads as ~21 °C → summer outfit,
+// but when they step into shade or the wind picks up they are underdressed.
+const OUTFIT_SUN_CAP = 3; // °C — max sun bonus applied when choosing clothing
+
 
 // ══════════════════════════════════════════════════════════════════
 // 2. LOOKUP TABLES
@@ -715,8 +721,16 @@ function resolveEmojiKey(weather, outfit, rainVisual) {
 
 // ─── Body class manager ───────────────────────────────────────────
 function applyBodyClasses() {
-  const next = `${_currentScene} time-${_currentTimeOfDay}`;
+  const next = `${_currentScene} time-${_currentTimeOfDay} ${_currentVariant}`;
   if (document.body.className !== next) document.body.className = next;
+}
+
+// Pick one of three scene variants. Rotates by day so the frame looks a bit
+// different from one day to the next — most visible on the weekend scene, but
+// also subtly varies spring / sunny / fall / cloudy palettes.
+function getSceneVariant(now) {
+  const doy = getDayOfYear(now);
+  return 'variant-' + ['a', 'b', 'c'][doy % 3];
 }
 
 // ─── Pixar-style emoji renderer ───────────────────────────────────
@@ -936,6 +950,7 @@ function updateForecastStrip(weather, now) {
 // ─── Global render state ──────────────────────────────────────────
 let _currentScene     = 'scene-spring';
 let _currentTimeOfDay = 'day';
+let _currentVariant   = 'variant-a';
 let _lastWeather      = null;   // last successful NormalizedWeather object
 let currentLioOutfit  = null;   // current image path suffix for Lio (change detection)
 let currentMikaOutfit = null;
@@ -968,10 +983,16 @@ function updateUI(weather) {
   const sunBonus     = calcSunBonus(weather, now);
   const playComfort  = getShortTermPlayComfort(weather, now);
   const rainVisual   = isRainVisual(weather, now);
-  const rainClothing = isRainClothing(weather, now);
+  // Rain gear must never undershoot the visual scene — if the frame shows rain,
+  // the kids had better be dressed for it.
+  const rainClothing = rainVisual || isRainClothing(weather, now);
 
   // ── Outfit decision ─────────────────────────────────────────────
-  const rawOutfit = determineOutfit(Math.round(playComfort), rainClothing, weather.code, now);
+  // Use a conservative "outfit comfort" that caps the sun bonus. Air temp is
+  // the floor + OUTFIT_SUN_CAP: when it is 16 °C with lots of sun, the outfit
+  // tops out at 19 °C (still Spring_Fall_Warm / light layers), never summer.
+  const outfitComfort = Math.min(playComfort, (weather.temp ?? 10) + OUTFIT_SUN_CAP);
+  const rawOutfit = determineOutfit(Math.round(outfitComfort), rainClothing, weather.code, now);
   const outfit    = applyHysteresis(rawOutfit);
 
   const lioSrc  = outfit + getDailyVariantSuffix(outfit, 'lio');
@@ -986,6 +1007,7 @@ function updateUI(weather) {
   // ── Time of day & scene ─────────────────────────────────────────
   const timeOfDay = getTimeOfDay(now, weather.sunrise, weather.sunset);
   const scene     = getVisualScene(weather, outfit, timeOfDay, rainVisual);
+  const variant   = getSceneVariant(now);
 
   setWeatherEmoji(resolveEmojiKey(weather, outfit, rainVisual));
 
@@ -993,7 +1015,8 @@ function updateUI(weather) {
   const sceneChanged =
     lioSrc  !== currentLioOutfit  ||
     mikaSrc !== currentMikaOutfit ||
-    scene   !== _currentScene;
+    scene   !== _currentScene     ||
+    variant !== _currentVariant;
 
   if (sceneChanged) {
     currentLioOutfit  = lioSrc;
@@ -1006,6 +1029,7 @@ function updateUI(weather) {
 
     _currentScene     = scene;
     _currentTimeOfDay = timeOfDay;
+    _currentVariant   = variant;
     applyBodyClasses();
     renderParticles(scene, weather.code);
   } else if (timeOfDay !== _currentTimeOfDay) {
