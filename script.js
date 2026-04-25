@@ -721,7 +721,8 @@ function resolveEmojiKey(weather, outfit, rainVisual) {
 
 // ─── Body class manager ───────────────────────────────────────────
 function applyBodyClasses() {
-  const next = `${_currentScene} time-${_currentTimeOfDay} ${_currentVariant}`;
+  const bikeClass = _isBikeOutfit ? ' outfit-bike' : '';
+  const next = `${_currentScene} time-${_currentTimeOfDay} ${_currentVariant}${bikeClass}`;
   if (document.body.className !== next) document.body.className = next;
 }
 
@@ -955,6 +956,7 @@ function updateForecastStrip(weather, now) {
 let _currentScene     = 'scene-spring';
 let _currentTimeOfDay = 'day';
 let _currentVariant   = 'variant-a';
+let _isBikeOutfit     = false;
 let _lastWeather      = null;   // last successful NormalizedWeather object
 let currentLioOutfit  = null;   // current image path suffix for Lio (change detection)
 let currentMikaOutfit = null;
@@ -1025,6 +1027,7 @@ function updateUI(weather) {
   if (sceneChanged) {
     currentLioOutfit  = lioSrc;
     currentMikaOutfit = mikaSrc;
+    _isBikeOutfit     = lioSrc.endsWith('_bike') || mikaSrc.endsWith('_bike');
 
     $lio.src  = `images/Lio_${lioSrc}.png`;
     $mika.src = `images/Mika_${mikaSrc}.png`;

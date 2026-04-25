@@ -908,6 +908,10 @@ body.time-dusk:not(.scene-sleepy):not(.scene-thunderstorm) .sky-tint {
   /* NO scaleX(-1) — Mika's PNG already faces the correct direction */
 }
 
+/* Bike images are wider than standing ones — shrink and push to edges */
+body.outfit-bike #lio  { left: 2%;  height: 60vh; }
+body.outfit-bike #mika { right: 2%; height: 55vh; }
+
 /* ─── 19. Portrait Hint ────────────────────────────── */
 #rotate-hint {
   display: none;
